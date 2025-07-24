@@ -1,0 +1,31 @@
+{
+  "name": "universal-social-media-downloader",
+  "version": "1.0.0",
+  "description": "A powerful universal social media downloader supporting YouTube, Instagram, TikTok, Twitter, and more",
+  "main": "api/app.py",
+  "scripts": {
+    "dev": "python api/app.py",
+    "build": "echo 'No build step required for Python Flask app'",
+    "start": "python api/app.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CodewithWitcher/Universal-Downloader.git"
+  },
+  "keywords": [
+    "downloader",
+    "social-media",
+    "youtube",
+    "instagram",
+    "tiktok",
+    "twitter",
+    "flask",
+    "python",
+    "vercel"
+  ],
+  "author": "mdimran.py",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.x"
+  }
+}

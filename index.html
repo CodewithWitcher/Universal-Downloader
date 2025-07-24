@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Social Media Downloader</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-card: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #a3a3a3;
+            --text-muted: #666666;
+            --accent: #8b5cf6;
+            --accent-hover: #7c3aed;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --border: #333333;
+            --border-light: #262626;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-weight: 400;
+            overflow-x: hidden;
+        }
+
+        .background-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 60px 0 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--accent), #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .main-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 40px;
+            background: var(--bg-secondary);
+            padding: 8px;
+            border-radius: 12px;
+        }
+
+        .tab {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .input-field {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .textarea-field {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error);
+        }
+
+        .status-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--warning);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+
+        .feature-card h3 {
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+
+        .platform-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .platform-list li {
+            padding: 8px 0;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .platform-list li:last-child {
+            border-bottom: none;
+        }
+
+        .platform-list li:before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-light);
+            margin-top: 60px;
+        }
+
+        .vercel-badge {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--accent);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .main-card {
+                padding: 24px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-gradient"></div>
+    
+    <div class="container">
+        <header class="header">
+            <h1>Universal Social Media Downloader</h1>
+            <p>Download content from YouTube, Instagram, TikTok, Twitter, and more platforms with ease</p>
+            <div class="vercel-badge">🚀 Deployed on Vercel</div>
+        </header>
+
+        <div class="main-card">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('single')">Single Download</button>
+                <button class="tab" onclick="switchTab('bulk')">Bulk Download</button>
+                <button class="tab" onclick="switchTab('platforms')">Supported Platforms</button>
+            </div>
+
+            <div id="single-tab" class="tab-content active">
+                <form onsubmit="downloadSingle(event)">
+                    <div class="form-group">
+                        <label for="single-url">Paste URL from any supported platform:</label>
+                        <input 
+                            type="url" 
+                            id="single-url" 
+                            class="input-field" 
+                            placeholder="https://www.youtube.com/watch?v=..."
+                            required
+                        >
+                    </div>
+                    <button type="submit" class="btn">
+                        <span class="spinner" id="single-spinner"></span>
+                        <span id="single-text">Download Content</span>
+                    </button>
+                    <div id="single-status" class="status-message"></div>
+                </form>
+            </div>
+
+            <div id="bulk-tab" class="tab-content">
+                <form onsubmit="downloadBulk(event)">
+                    <div class="form-group">
+                        <label for="bulk-urls">Paste multiple URLs (one per line, max 5):</label>
+                        <textarea 
+                            id="bulk-urls" 
+                            class="input-field textarea-field" 
+                            placeholder="https://www.youtube.com/watch?v=...&#10;https://www.instagram.com/p/...&#10;https://www.tiktok.com/..."
+                            required
+                        ></textarea>
+                    </div>
+                    <button type="submit" class="btn">
+                        <span class="spinner" id="bulk-spinner"></span>
+                        <span id="bulk-text">Download All</span>
+                    </button>
+                    <div id="bulk-status" class="status-message"></div>
+                </form>
+            </div>
+
+            <div id="platforms-tab" class="tab-content">
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>🎥 Video Platforms</h3>
+                        <ul class="platform-list">
+                            <li>YouTube (videos, shorts, playlists)</li>
+                            <li>TikTok</li>
+                            <li>Twitter/X</li>
+                            <li>Facebook</li>
+                            <li>Instagram (Reels, IGTV)</li>
+                            <li>Reddit</li>
+                            <li>Twitch</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>📱 Social Media</h3>
+                        <ul class="platform-list">
+                            <li>Instagram (Posts, Stories, Reels)</li>
+                            <li>Twitter/X (Tweets, Threads)</li>
+                            <li>Facebook (Posts, Videos)</li>
+                            <li>Reddit (Posts, Images, Videos)</li>
+                            <li>LinkedIn (Posts)</li>
+                            <li>Pinterest (Pins)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>⚡ Features</h3>
+                        <ul class="platform-list">
+                            <li>Auto-platform detection</li>
+                            <li>Bulk downloads (max 5 URLs)</li>
+                            <li>High quality downloads</li>
+                            <li>Metadata preservation</li>
+                            <li>Subtitle downloads</li>
+                            <li>Direct download links</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 Universal Social Media Downloader | Made with ❤️ by mdimran.py</p>
+        <p>Deployed on Vercel for fast, global access</p>
+    </footer>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        async function downloadSingle(event) {
+            event.preventDefault();
+            
+            const url = document.getElementById('single-url').value.trim();
+            const statusDiv = document.getElementById('single-status');
+            const spinner = document.getElementById('single-spinner');
+            const buttonText = document.getElementById('single-text');
+            const button = document.querySelector('#single-tab .btn');
+            
+            if (!url) {
+                showStatus(statusDiv, 'Please enter a valid URL', 'error');
+                return;
+            }
+            
+            // Show loading state
+            button.disabled = true;
+            spinner.style.display = 'block';
+            buttonText.textContent = 'Downloading...';
+            statusDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    let message = `✅ ${result.message}`;
+                    if (result.title) {
+                        message += `\n📝 Title: ${result.title}`;
+                    }
+                    if (result.uploader) {
+                        message += `\n👤 Uploader: ${result.uploader}`;
+                    }
+                    if (result.platform) {
+                        message += `\n🌐 Platform: ${result.platform}`;
+                    }
+                    showStatus(statusDiv, message, 'success');
+                } else {
+                    showStatus(statusDiv, `❌ ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(statusDiv, `❌ Network error: ${error.message}`, 'error');
+            } finally {
+                // Reset button state
+                button.disabled = false;
+                spinner.style.display = 'none';
+                buttonText.textContent = 'Download Content';
+            }
+        }
+
+        async function downloadBulk(event) {
+            event.preventDefault();
+            
+            const urlsText = document.getElementById('bulk-urls').value.trim();
+            const statusDiv = document.getElementById('bulk-status');
+            const spinner = document.getElementById('bulk-spinner');
+            const buttonText = document.getElementById('bulk-text');
+            const button = document.querySelector('#bulk-tab .btn');
+            
+            if (!urlsText) {
+                showStatus(statusDiv, 'Please enter URLs', 'error');
+                return;
+            }
+            
+            const urls = urlsText.split('\n').filter(url => url.trim());
+            
+            if (urls.length === 0) {
+                showStatus(statusDiv, 'Please enter valid URLs', 'error');
+                return;
+            }
+            
+            if (urls.length > 5) {
+                showStatus(statusDiv, 'Maximum 5 URLs allowed for bulk download', 'warning');
+                return;
+            }
+            
+            // Show loading state
+            button.disabled = true;
+            spinner.style.display = 'block';
+            buttonText.textContent = 'Processing...';
+            statusDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/bulk-download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ urls: urls })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    let message = `✅ ${result.message}\n\n`;
+                    result.results.forEach((res, index) => {
+                        message += `${index + 1}. ${res.status === 'success' ? '✅' : '❌'} ${res.message}\n`;
+                    });
+                    showStatus(statusDiv, message, 'success');
+                } else {
+                    showStatus(statusDiv, `❌ ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(statusDiv, `❌ Network error: ${error.message}`, 'error');
+            } finally {
+                // Reset button state
+                button.disabled = false;
+                spinner.style.display = 'none';
+                buttonText.textContent = 'Download All';
+            }
+        }
+
+        function showStatus(statusDiv, message, type) {
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.style.display = 'block';
+            
+            // Auto hide after 10 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 10000);
+            }
+        }
+
+        // Add some basic form validation
+        document.getElementById('single-url').addEventListener('input', function(e) {
+            const url = e.target.value;
+            if (url && !isValidUrl(url)) {
+                e.target.setCustomValidity('Please enter a valid URL');
+            } else {
+                e.target.setCustomValidity('');
+            }
+        });
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        // Load supported platforms on page load
+        window.addEventListener('load', async function() {
+            try {
+                const response = await fetch('/supported-platforms');
+                const platforms = await response.json();
+                console.log('Supported platforms loaded:', platforms);
+            } catch (error) {
+                console.log('Could not load platform info:', error);
+            }
+        });
+    </script>
+</body>
+</html>
