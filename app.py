@@ -13,7 +13,7 @@ import zipfile
 import shutil
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here-change-this'
+app.config['SECRET_KEY'] = 'universal-downloader-local-development-2025'
 
 # Create downloads directory if it doesn't exist
 DOWNLOAD_DIR = os.path.join(os.getcwd(), 'downloads')
@@ -63,15 +63,22 @@ class UniversalDownloader:
         return filename
     
     def download_youtube_content(self, url, path):
-        """Download YouTube videos, shorts, playlists"""
+        """Download YouTube videos, shorts, playlists in highest quality"""
         try:
             ydl_opts = {
                 'outtmpl': os.path.join(path, '%(uploader)s - %(title)s.%(ext)s'),
-                'format': 'best[height<=1080]',
+                'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                 'writesubtitles': True,
                 'writeautomaticsub': True,
-                'subtitleslangs': ['en'],
+                'subtitleslangs': ['en', 'auto'],
                 'ignoreerrors': True,
+                'writeinfojson': True,
+                'writethumbnail': True,
+                'embedsubs': True,
+                'postprocessors': [{
+                    'key': 'FFmpegVideoConvertor',
+                    'preferedformat': 'mp4',
+                }],
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -97,17 +104,19 @@ class UniversalDownloader:
             return {'status': 'error', 'message': f'YouTube error: {str(e)}'}
     
     def download_instagram_content(self, url, path):
-        """Download Instagram posts, reels, stories, IGTV"""
+        """Download Instagram posts, reels, stories, IGTV in highest quality"""
         try:
             loader = instaloader.Instaloader(
                 dirname_pattern=path,
                 filename_pattern='{profile}_{mediaid}_{date_utc}',
                 download_videos=True,
-                download_video_thumbnails=False,
-                download_geotags=False,
-                download_comments=False,
+                download_video_thumbnails=True,
+                download_geotags=True,
+                download_comments=True,
                 save_metadata=True,
-                compress_json=False
+                compress_json=False,
+                post_metadata_txt_pattern='',
+                storyitem_metadata_txt_pattern=''
             )
             
             # Handle different Instagram URL types
@@ -164,11 +173,13 @@ class UniversalDownloader:
             return {'status': 'error', 'message': f'Instagram error: {str(e)}'}
     
     def download_tiktok_content(self, url, path):
-        """Download TikTok videos"""
+        """Download TikTok videos in highest quality"""
         try:
             ydl_opts = {
                 'outtmpl': os.path.join(path, 'TikTok_%(uploader)s_%(title)s.%(ext)s'),
-                'format': 'best',
+                'format': 'best[ext=mp4]/best',
+                'writeinfojson': True,
+                'writethumbnail': True,
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -184,11 +195,14 @@ class UniversalDownloader:
             return {'status': 'error', 'message': f'TikTok error: {str(e)}'}
     
     def download_twitter_content(self, url, path):
-        """Download Twitter/X videos, images, threads"""
+        """Download Twitter/X videos, images, threads in highest quality"""
         try:
             ydl_opts = {
                 'outtmpl': os.path.join(path, 'Twitter_%(uploader)s_%(title)s.%(ext)s'),
+                'format': 'best[ext=mp4]/best',
                 'writesubtitles': True,
+                'writeinfojson': True,
+                'writethumbnail': True,
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -204,11 +218,13 @@ class UniversalDownloader:
             return {'status': 'error', 'message': f'Twitter error: {str(e)}'}
     
     def download_facebook_content(self, url, path):
-        """Download Facebook videos, posts"""
+        """Download Facebook videos, posts in highest quality"""
         try:
             ydl_opts = {
                 'outtmpl': os.path.join(path, 'Facebook_%(title)s.%(ext)s'),
-                'format': 'best',
+                'format': 'best[ext=mp4]/best',
+                'writeinfojson': True,
+                'writethumbnail': True,
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -223,10 +239,13 @@ class UniversalDownloader:
             return {'status': 'error', 'message': f'Facebook error: {str(e)}'}
     
     def download_reddit_content(self, url, path):
-        """Download Reddit videos, images, gifs"""
+        """Download Reddit videos, images, gifs in highest quality"""
         try:
             ydl_opts = {
                 'outtmpl': os.path.join(path, 'Reddit_%(title)s.%(ext)s'),
+                'format': 'best[ext=mp4]/best',
+                'writeinfojson': True,
+                'writethumbnail': True,
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -241,11 +260,15 @@ class UniversalDownloader:
             return {'status': 'error', 'message': f'Reddit error: {str(e)}'}
     
     def download_generic_content(self, url, path):
-        """Download from any supported platform using yt-dlp"""
+        """Download from any supported platform using yt-dlp in highest quality"""
         try:
             ydl_opts = {
                 'outtmpl': os.path.join(path, '%(extractor)s_%(title)s.%(ext)s'),
-                'format': 'best',
+                'format': 'bestvideo+bestaudio/best[ext=mp4]/best',
+                'writeinfojson': True,
+                'writethumbnail': True,
+                'writesubtitles': True,
+                'writeautomaticsub': True,
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -479,11 +502,11 @@ def clear_downloads():
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("UNIVERSAL SOCIAL MEDIA DOWNLOADER")
+    print("UNIVERSAL SOCIAL MEDIA DOWNLOADER - HIGHEST QUALITY")
     print("=" * 60)
     print("Starting server...")
     print("Supported platforms: YouTube, Instagram, TikTok, Twitter/X, Facebook, Reddit, and more!")
-    print("Features: Stories, Reels, Posts, Videos, Bulk downloads")
-    print("Server running on: http://localhost:5000")
+    print("Features: Highest Quality Downloads, Stories, Reels, Posts, Videos, Bulk downloads")
+    print("Server running on: http://localhost:8080")
     print("=" * 60)
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=8080)
